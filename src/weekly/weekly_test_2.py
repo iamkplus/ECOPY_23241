@@ -14,7 +14,8 @@ class LaplaceDistribution:
     def ppf(self, x):
         return self.loc - self.scale * math.copysign(1, (x - 0.5)) * math.log(1 - 2 * abs(x - 0.5))
     def gen_rand(self):
-        return self.scale * math.log(random.random()) - (self.scale * math.log(random.random()))
+        u = random.random() - 0.5
+        return self.loc - self.scale * math.copysign(1, u) * math.log(1 - 2 * abs(u))
     def mean(self):
         if (self.loc == None):
             raise Exception("Moment undefined")
@@ -29,12 +30,12 @@ class LaplaceDistribution:
         return 3
 
     def mvsk(self):
-        self.moments = []
-        self.moments.append(0)
-        self.moments.append(2 * (self.scale ** 2) + self.loc ** 2)
-        self.moments.append(0)
-        self.moments.append(24 * (self.scale ** 4))
-        return self.moments
+        moments = []
+        moments.append(self.loc)
+        moments.append(2 * (self.scale ** 2))
+        moments.append(0)
+        moments.append(self.ex_kurtosis())
+        return moments
 
 class ParetoDistribution:
     def __init__(self, rand, scale, shape):
@@ -45,11 +46,41 @@ class ParetoDistribution:
         return (self.shape * (self.scale ** self.shape)) / (x ** (self.shape + 1))
     def cdf(self, x):
         return 1 - ((self.scale / x) ** self.shape)
+
+    def ppf(self, x):
+        return self.scale * math.pow(1 - x, -1 / self.shape)
     def mean(self):
-        return (self.shape * self.scale) / (self.shape - 1)
+        if self.shape <= 1:
+            raise Exception("Moment undefined")
+        else:
+            return (self.scale * self.shape / (self.shape - 1))
 
     def variance(self):
-        return (self.scale ** 2) * self.shape / (((self.shape - 1) ** 2) * (self.shape - 2))
+        if self.shape <= 2:
+            raise Exception("Moment undefined")
+        else:
+            return (self.scale ** 2 * self.shape / ((self.shape - 1) ** 2 * (self.shape - 2)))
 
     def skewness(self):
-        return 2 * (1 + self.shape) / (self.shape - 3) * (((self.shape - 2) / self.shape) ** 0.5)
+        if self.shape <= 3:
+            raise Exception("Moment undefined")
+        else:
+            return ((2 * (1 + self.shape)) / (self.shape - 3)) * (math.pow((1 - (2 / self.shape)), 0.5))
+
+    def ex_kurtosis(self):
+        if self.shape <= 4:
+            raise Exception("Moment undefined")
+        else:
+            return (3 * (self.shape - 2) * (3 * (self.shape ** 2) + self.shape + 2)) / (self.shape * (self.shape - 3) * (self.shape - 4))
+
+    def gen_rand(self):
+        u = random.random()
+        return self.scale * math.pow(1 - u, -1 / self.shape)
+
+    def mvsk(self):
+        moments = []
+        moments.append(self.scale * self.shape / (self.shape - 1))
+        moments.append(self.scale ** 2 * self.shape / ((self.shape - 1) ** 2 * (self.shape - 2)))
+        moments.append(((2 * (1 + self.shape)) / (self.shape - 3)) * (math.pow((1 - (2 / self.shape)), 0.5)))
+        moments.append((3 * (self.shape - 2) * (3 * (self.shape ** 2) + self.shape + 2)) / (self.shape * (self.shape - 3) * (self.shape - 4)))
+        return moments
