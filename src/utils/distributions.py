@@ -1,4 +1,6 @@
 import random
+import math
+from scipy.special import gamma, gammainc, gammainciv
 
 # 1
 class FirstClass:
@@ -69,11 +71,74 @@ class UniformDistribution:
         self.mvsk.append(self.ex_kurtosis())
         return self.mvsk
 
+class LogisticDistribution:
+    def __init__(self, rand, loc, scale):
+        self.rand = rand
+        self.loc = loc
+        self.scale = scale
 
+    def pdf(self, x):
+        return math.exp(( - (x - self.loc) / self.scale)) / (self.scale * ((1 + math.exp(- (x - self.loc) / self.scale)) ** 2))
 
-# innentől képletek
-# normál eloszlás:
-# átlag = medián
-# ferdeség, csúcsosság = 0; centrális momentumokból a második variancia, többi 0
+    def cdf(self, x):
+        return 1 / (1 + math.exp( - (x - self.loc) / self.scale))
 
-# cauchy: átlag nincs, medián középpont, nincs ferdeség, variancia, csúcsosság, és momentum
+    def ppf(self, p):
+        return self.loc + self.scale * math.log(p / (1 - p))
+
+    def gen_rand(self):
+        p = random.random()
+        return self.loc + self.scale * math.log(p / (1 - p))
+
+    def mean(self):
+        return self.loc
+
+    def variance(self):
+        return ((math.pi ** 2) / 3) * (self.scale ** 2)
+
+    def skewness(self):
+        return 0
+
+    def ex_kurtosis(self):
+        return 6 / 5
+
+    def mvsk(self):
+        moments = []
+        moments.append(self.mean())
+        moments.append(self.variance())
+        moments.append(self.skewness())
+        moments.append(self.ex_kurtosis())
+        return moments
+
+class ChiSquaredDistribution:
+    def __init__(self, rand, dof):
+        self.rand = rand
+        self.dof = dof
+
+    def pdf(self, x):
+        return (1 / (math.pow(2, self.dof/2) * gamma(self.dof / 2))) ** (math.pow(x, self.dof/2 - 1) * math.exp(- x / 2))
+
+    def cdf(self, x):
+        return (1 / gamma(self.dof / 2)) * gammainc(self.dof / 2, x / 2)
+
+    def ppf(self, x):
+        pass
+
+    def mean(self):
+        return self.dof
+
+    def variance(self):
+        return self.dof * 2
+
+    def skewness(self):
+        return (8 / self.dof) ** 0.5
+
+    def ex_kurtosis(self):
+        return 12 / self.dof
+
+    def mvsk(self):
+        moments = []
+        moments.append(self.mean())
+        moments.append(self.variance())
+        moments.append(self.skewness())
+        moments.append(self.ex_kurtosis())
