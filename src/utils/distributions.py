@@ -1,6 +1,7 @@
 import random
 import math
-from scipy.special import gamma, gammainc, gammainciv
+from scipy.special import gamma, gammainc, gammaincinv
+from scipy.stats import chi2
 
 # 1
 class FirstClass:
@@ -87,7 +88,7 @@ class LogisticDistribution:
         return self.loc + self.scale * math.log(p / (1 - p))
 
     def gen_rand(self):
-        p = random.random()
+        p = self.rand
         return self.loc + self.scale * math.log(p / (1 - p))
 
     def mean(self):
@@ -116,13 +117,17 @@ class ChiSquaredDistribution:
         self.dof = dof
 
     def pdf(self, x):
-        return (1 / (math.pow(2, self.dof/2) * gamma(self.dof / 2))) ** (math.pow(x, self.dof/2 - 1) * math.exp(- x / 2))
+        return (1 / (math.pow(2, self.dof / 2) * gamma(self.dof / 2))) * (math.pow(x, self.dof / 2 - 1) * math.exp(- x / 2))
 
     def cdf(self, x):
-        return (1 / gamma(self.dof / 2)) * gammainc(self.dof / 2, x / 2)
+        return gammainc(self.dof / 2, x / 2)
 
-    def ppf(self, x):
-        pass
+    def ppf(self, p):
+        return 2 * gammaincinv(self.dof / 2, p)
+
+    def gen_rand(self):
+        p = random.random()
+        return 2 * gammaincinv(self.dof / 2, p)
 
     def mean(self):
         return self.dof
@@ -142,3 +147,4 @@ class ChiSquaredDistribution:
         moments.append(self.variance())
         moments.append(self.skewness())
         moments.append(self.ex_kurtosis())
+        return moments
