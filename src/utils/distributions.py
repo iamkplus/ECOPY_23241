@@ -1,7 +1,7 @@
 import random
 import math
 from scipy.special import gamma, gammainc, gammaincinv
-from scipy.stats import chi2
+import pyerf
 
 # 1
 class FirstClass:
@@ -35,42 +35,49 @@ class UniformDistribution:
         self.mean = (self.a + self.b)/2
         return self.mean
     def median(self):
-        if (self.b < self.a):
-            raise Exception("Moment undefined")
-        self.median = (self.a + self.b)/2
-        return self.median
+        return (self.a + self.b)/2
 
     def median(self):
-        if (self.b < self.a):
-            raise Exception("Moment undefined")
-        self.median = (self.a + self.b)/2
-        return self.median
+        return (self.a + self.b)/2
 
     def variance(self):
-        if (self.b < self.a):
-            raise Exception("Moment undefined")
-        self.variance = ((self.b - self.a) ** 2) / 12
-        return self.variance
+        return (self.b - self.a) / 12
 
     def skewness(self):
-        if (self.b < self.a):
-            raise Exception("Moment undefined")
-        self.skewness = 0
-        return self.skewness
-
+        return 0
     def ex_kurtosis(self):
-        if (self.b < self.a):
-            raise Exception("Moment undefined")
-        self.ex_kurtosis = -1.2
-        return self.ex_kurtosis
+        return - self.b / (self.b - self.a)
 
     def mvsk(self):
         self.mvsk = []
-        self.mvsk.append(0)
+        self.mvsk.append(self.mean())
         self.mvsk.append(self.variance())
         self.mvsk.append(self.skewness())
         self.mvsk.append(self.ex_kurtosis())
         return self.mvsk
+
+class NormalDistribution:
+    def __init__(self, rand, loc, scale):
+        self.rand = rand
+        self.loc = loc
+        self.scale = scale
+
+    def pdf(self, x):
+        std = self.scale ** 0.5
+        return (1 / (std * math.sqrt(2 * math.pi))) * math.exp(-((x - self.loc) ** 2) / (2 * std ** 2))
+
+    def cdf(self, x):
+        std = self.scale ** 0.5
+        return 0.5 * (1 + math.erf((x - self.loc) / (std * math.sqrt(2))))
+
+    def ppf(self, p):
+        std = self.scale ** 0.5
+        return self.loc + std * math.sqrt(2) * pyerf.erfinv(2 * p - 1)
+
+    def gen_rand(self):
+        std = self.scale ** 0.5
+        return self.loc + std * math.sqrt(2) * pyerf.erfinv(2 * random.random() - 1)
+
 
 class LogisticDistribution:
     def __init__(self, rand, loc, scale):
