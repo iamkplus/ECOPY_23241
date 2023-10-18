@@ -1,10 +1,10 @@
 import pandas as pd
 import typing
-import matplotlib
+import matplotlib.pyplot as plt
 import random
 import src.weekly
 
-euro12 = pd.read_csv(r"C:\Users\mnb-hallg-19\Documents\GitHub\ECOPY_23241\data\Euro_2012_stats_TEAM.csv")
+euro12 = pd.read_csv(r"C:\Users\mnb-hallg-14\Documents\GitHub\ECOPY_23241\data\Euro_2012_stats_TEAM.csv")
 
 def number_of_participants(input_df):
     return len(input_df["Team"])
@@ -48,9 +48,9 @@ def sliced_view(input_df, columns_to_keep, column_to_filter, rows_to_keep):
 def generate_quartile(input_df):
     result = input_df.copy()
     result["Quartile"] = 4
-    result[result["Goal"] >= 3, "Quartile"] = 3
-    result[result["Goal"] >= 5, "Quartile"] = 2
-    result[result["Goal"] >= 6, "Quartile"] = 1
+    result[result["Goals"] >= 3, "Quartile"] = 3
+    result[result["Goals"] >= 5, "Quartile"] = 2
+    result[result["Goals"] >= 6, "Quartile"] = 1
     return result
 
 def average_yellow_in_quartiles(input_df):
@@ -80,8 +80,25 @@ def gen_pareto_mean_trajectories(pareto_distribution, number_of_trajectories, le
         templist.clear()
     return result
 
+def scatter_goals_shots(input_df):
+    fig, ax = plt.subplots()
+    ax.scatter(input_df["Goals"], input_df["Shots on target"])
+    ax.set_xlabel("Goals")
+    ax.set_ylabel("Shots on target")
+    ax.set_title("Goals and Shot on target")
+    plt.show()
+    return fig, ax
 
+def scatter_goals_shots_by_quartile(input_df):
+    fig, ax = plt.subplots()
+    ax.scatter(input_df["Goals"], input_df["Shots on target"], marker=input_df["Quartiles"], cmap="gray")
+    ax.set_xlabel("Goals")
+    ax.set_ylabel("Shots on target")
+    ax.set_title("Goals and Shot on target")
+    plt.show()
+    return fig, ax
 
+scatter_goals_shots_by_quartile(generate_quartile(euro12))
 
 def cumavg_list(input_list):
     avg_list = []
