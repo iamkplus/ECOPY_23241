@@ -155,3 +155,16 @@ class ChiSquaredDistribution:
         moments.append(self.skewness())
         moments.append(self.ex_kurtosis())
         return moments
+
+class CauchyDistribution:
+    def __init__(self, rand, loc, scale):
+        self.rand = rand
+        self.loc = loc
+        self.scale = scale
+
+    def ppf(self, p):
+        return math.tan(math.pi*p - math.pi/2.0)
+
+    def gen_rand(self):
+        p = random.random()
+        return math.tan(math.pi * p - math.pi / 2.0)
