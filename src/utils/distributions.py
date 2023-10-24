@@ -28,7 +28,8 @@ class UniformDistribution:
         self.ppf = self.a + x * (self.b - self.a)
         return self.ppf
     def gen_rand(self):
-        return random.uniform(self.a, self.b)
+        x = self.rand.random()
+        return self.a + x * (self.b - self.a)
     def mean(self):
         if (self.b < self.a):
             raise Exception("Moment undefined")
@@ -95,7 +96,7 @@ class LogisticDistribution:
         return self.loc + self.scale * math.log(p / (1 - p))
 
     def gen_rand(self):
-        p = self.rand
+        p = random.random()
         return self.loc + self.scale * math.log(p / (1 - p))
 
     def mean(self):
@@ -163,8 +164,8 @@ class CauchyDistribution:
         self.scale = scale
 
     def ppf(self, p):
-        return math.tan(math.pi*p - math.pi/2.0)
+        return self.loc + self.scale * math.tan(math.pi * (p - 0.5))
 
     def gen_rand(self):
         p = random.random()
-        return math.tan(math.pi * p - math.pi / 2.0)
+        return self.loc + self.scale * math.tan(math.pi * (p - 0.5))

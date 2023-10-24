@@ -1,5 +1,6 @@
 import random
 import math
+from scipy.stats import pareto
 
 class LaplaceDistribution:
     def __init__(self, rand, loc, scale):
@@ -50,9 +51,6 @@ class ParetoDistribution:
     def ppf(self, x):
         return self.scale * math.pow(1 - x, -1 / self.shape)
     def mean(self):
-        if self.shape <= 1:
-            raise Exception("Moment undefined")
-        else:
             return (self.scale * self.shape / (self.shape - 1))
 
     def variance(self):
@@ -68,6 +66,9 @@ class ParetoDistribution:
             return ((2 * (1 + self.shape)) / (self.shape - 3)) * (math.pow((1 - (2 / self.shape)), 0.5))
 
     def ex_kurtosis(self):
+        return (6 * (self.shape ** 3 + self.shape ** 2 - 6 * self.shape - 2)) / (self.shape * (self.shape - 3) * (self.shape - 4))
+
+    def fake_ex_kurtosis(self):
         if self.shape <= 4:
             raise Exception("Moment undefined")
         else:
@@ -79,8 +80,8 @@ class ParetoDistribution:
 
     def mvsk(self):
         moments = []
-        moments.append(self.scale * self.shape / (self.shape - 1))
-        moments.append(self.scale ** 2 * self.shape / ((self.shape - 1) ** 2 * (self.shape - 2)))
-        moments.append(((2 * (1 + self.shape)) / (self.shape - 3)) * (math.pow((1 - (2 / self.shape)), 0.5)))
-        moments.append((3 * (self.shape - 2) * (3 * (self.shape ** 2) + self.shape + 2)) / (self.shape * (self.shape - 3) * (self.shape - 4)))
+        moments.append(self.mean())
+        moments.append(self.variance())
+        moments.append(self.skewness())
+        moments.append(self.ex_kurtosis())
         return moments
