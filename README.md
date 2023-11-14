@@ -45,6 +45,20 @@ Required for the **5th theoretic** test (review some major theorems and assumpti
 * [Delta method (1)](https://www.youtube.com/watch?v=Tv1pEA8RngE)
 * Gauss-Markov assumption (5) [video with no perfect overlap](https://www.youtube.com/watch?v=QGrRRWUaT2o&list=PLqdN24UCw5hlIrdfErPUgnoIQC4U6cxiL&index=2)
 
+Required for the **6th theoretic** test:
+
+* [Z-value (1)](https://www.youtube.com/watch?v=Wp2nVIzBsE8)
+* [T-value (1)](https://www.youtube.com/watch?v=5ABpqVSx33I)
+* 3 steps of T-test (1)
+* [Small sample Wald test (1)](https://www.youtube.com/watch?v=l66kDWqloU0)
+* [Centered R-squared](https://www.youtube.com/watch?v=bMccdk8EdGo) and [adjusted R-squared](https://www.youtube.com/watch?v=8W2fGkU5LYU) values (2)
+
+Required for the **7th theoretic** test:
+
+* Implications of heteroscedasticity (4)
+* Gauss-Markov assumptions in case of generalized regression model (5)
+* Finite-sample properties of GLS (3)
+
 ## Practice
 
 **[Python Classes](https://realpython.com/python3-object-oriented-programming/)** (If the link does not work, open in *
