@@ -95,6 +95,23 @@ class LinearRegressionNP:
         ars = 1 - (1 - crs) * (len(self.left_hand_side) - 1) / (len(self.left_hand_side) - self.right_hand_side.shape[1])
         return f"Centered R-squared: {crs:.3f}, Adjusted R-squared: {ars:.3f}"
 
+    def get_paired_se_and_percentile_ci(self, number_of_bootstrap_samples, alpha, random_seed):
+        np.random.seed(random_seed)
+        left_bootstrap = np.random.choice(self.left_hand_side, size=(number_of_bootstrap_samples, len(self.left_hand_side)), replace=True)
+        right_bootstrap = np.random.choice(self.left_hand_side, size=(number_of_bootstrap_samples, len(self.left_hand_side)), replace=True)
+        left_estimate = np.mean(left_bootstrap)
+        right_estimate = np.mean(right_bootstrap)
+        diffs = left_estimate - right_estimate
+        bse = np.std(diffs, ddof=1)
+        lb, ub = np.percentile(diffs, [100 * alpha / 2, 100 * (1 - alpha / 2)])
+        return f"Paired Bootstraped SE: {bse:.3f}, CI: [{lb:.3f}, {ub:.3f}]"
+
+    def get_wild_se_and_normal_ci(self, number_of_bootstrap_samples, alpha, random_seed):
+        bse = 0
+        lb = 0
+        ub = 0
+        return f"Wild Bootstraped SE: {bse:.3f}, CI: [{lb:.3f}, {ub:.3f}]"
+
 class LinearRegressionGLS:
     def __init__(self, left_hand_side, right_hand_side):
         self.left_hand_side = left_hand_side
@@ -105,7 +122,6 @@ class LinearRegressionGLS:
 
     def fit(self):
         pass
-
 
 class LinearRegressionML:
     def __init__(self, left_hand_side, right_hand_side):
