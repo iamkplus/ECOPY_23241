@@ -96,20 +96,43 @@ class LinearRegressionNP:
         return f"Centered R-squared: {crs:.3f}, Adjusted R-squared: {ars:.3f}"
 
     def get_paired_se_and_percentile_ci(self, number_of_bootstrap_samples, alpha, random_seed):
+        def fit2(left_sample, right_sample):
+            XTX_inv = np.linalg.inv(np.dot(right_sample.T, right_sample))
+            beta = np.dot(np.dot(XTX_inv, right_sample.T), left_sample)
+            residuals = left_sample - np.dot(right_sample, beta)
+            sigma_squared = np.sum(residuals ** 2) / (len(self.left_hand_side) - self.right_hand_side.shape[1])
+            se = np.sqrt(np.diagonal(sigma_squared * XTX_inv))
+            return se
+
         np.random.seed(random_seed)
-        left_bootstrap = np.random.choice(self.left_hand_side, size=(number_of_bootstrap_samples, len(self.left_hand_side)), replace=True)
-        right_bootstrap = np.random.choice(self.left_hand_side, size=(number_of_bootstrap_samples, len(self.left_hand_side)), replace=True)
-        left_estimate = np.mean(left_bootstrap)
-        right_estimate = np.mean(right_bootstrap)
-        diffs = left_estimate - right_estimate
-        bse = np.std(diffs, ddof=1)
-        lb, ub = np.percentile(diffs, [100 * alpha / 2, 100 * (1 - alpha / 2)])
+        bootstrap_samples = []
+        for _ in range(number_of_bootstrap_samples):
+            ind = np.arange(len(self.right_hand_side))
+            bs_ind = np.random.choice(ind, size=len(ind), replace=True)
+            left_sample = self.left_hand_side[bs_ind]
+            right_sample = self.right_hand_side[bs_ind]
+            bootstrap_samples.append(fit2(left_sample, right_sample)[1])
+        bse = np.mean(bootstrap_samples)
+        lb, ub = np.percentile(bootstrap_samples, [100 * alpha / 2, 100 * (1 - alpha / 2)])
         return f"Paired Bootstraped SE: {bse:.3f}, CI: [{lb:.3f}, {ub:.3f}]"
 
     def get_wild_se_and_normal_ci(self, number_of_bootstrap_samples, alpha, random_seed):
-        bse = 0
-        lb = 0
-        ub = 0
+        np.random.seed(random_seed)
+        sample_size = len(self.left_hand_side)
+
+        def generate_wild_bootstrap_sample():
+            residuals_sample = np.random.choice(self.residuals, size=sample_size, replace=True)
+            left_bootstrap_sample = self.left_hand_side + residuals_sample
+            right_bootstrap_sample = np.dot(self.right_hand_side, self._model['beta']) + residuals_sample
+            return left_bootstrap_sample, right_bootstrap_sample
+        left_bootstrap, right_bootstrap = zip(
+            *[generate_wild_bootstrap_sample() for _ in range(number_of_bootstrap_samples)])
+        left_bootstrap = np.array(left_bootstrap)
+        right_bootstrap = np.array(right_bootstrap)
+        diffs = left_bootstrap - right_bootstrap
+        bse = np.std(diffs, ddof=1)
+        lb, ub = np.percentile(diffs, [100 * alpha / 2, 100 * (1 - alpha / 2)])
+
         return f"Wild Bootstraped SE: {bse:.3f}, CI: [{lb:.3f}, {ub:.3f}]"
 
 class LinearRegressionGLS:
